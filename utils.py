@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import threading
 import PyPDF2
 import docx
 import requests
@@ -8,6 +9,7 @@ import base64
 import datetime
 from io import BytesIO
 from openai import OpenAI
+import gemini_client
 from fpdf import FPDF
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
@@ -133,9 +135,52 @@ def _is_american_british_pair(orig, suggestion):
         return True
     return False
 
-# Initialize OpenAI client
+# OpenAI client (default provider), created on first use.
+# When USE_GEMINI is enabled, call_openai_api() routes to Gemini instead and
+# this client is never built, so OPENAI_API_KEY is not required in that mode.
+# The client is created lazily because recent openai SDKs raise on a missing
+# API key at construction time, which would break import in Gemini-only
+# deployments.
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+openai_client = None
+_openai_client_lock = threading.Lock()
+
+
+def get_openai_client():
+    """Return the process-wide OpenAI client, building it on first call."""
+    global openai_client
+    if openai_client is not None:
+        return openai_client
+    with _openai_client_lock:
+        if openai_client is None:
+            # `or None` lets the SDK fall back to its own env-var lookup.
+            openai_client = OpenAI(api_key=OPENAI_API_KEY or None)
+        return openai_client
+
+# Prefixes of the error strings returned by call_openai_api() on failure.
+API_ERROR_PREFIXES = ("Error calling OpenAI API:", "Error calling Gemini API:")
+
+
+def is_api_error_message(value):
+    """True when a call_openai_api() result is a provider error string."""
+    return isinstance(value, str) and value.startswith(API_ERROR_PREFIXES)
+
+
+def describe_ai_provider():
+    """One-line description of the AI provider this process will actually use.
+
+    Contains no secrets — keys are reported as set/missing, never echoed.
+    """
+    if gemini_client.use_gemini():
+        return gemini_client.describe_provider()
+    return "OpenAI | model=gpt-4o (default) | OPENAI_API_KEY=%s" % (
+        "set" if OPENAI_API_KEY else "MISSING",
+    )
+
+
+# Logged once per process so deployment logs state unambiguously which
+# provider is serving traffic.
+print("[AI provider] " + describe_ai_provider())
 
 _COMMON_WORDS = None
 
@@ -454,42 +499,70 @@ def extract_text_from_docx(docx_file):
 
 def call_openai_api(prompt, model="gpt-4o", response_format=None, temperature=0.5, seed=None):
     """
-    Call the OpenAI API with the given prompt.
-    
+    Call the configured AI provider with the given prompt.
+
+    This is the single entry point for every AI call in the application. The
+    provider is chosen by the USE_GEMINI environment variable:
+      * unset/false -> OpenAI chat-completions (default, unchanged behaviour)
+      * true        -> Google Gemini (Vertex AI or Gemini Developer API)
+    Both paths return the same shapes, so callers need no changes.
+
     Args:
         prompt (str): The prompt to send to the API
-        model (str): The OpenAI model to use
+        model (str): Model to use. In Gemini mode an OpenAI model id such as
+            "gpt-4o" is mapped to GENAI_MODEL_NAME; an explicit Gemini model
+            id is honoured as given.
         response_format (str, optional): Format for response (e.g., "json_object")
         temperature (float): Temperature for response generation (default 0.5)
         seed (int, optional): Fixed seed for deterministic output
-        
+
     Returns:
-        The content of the API response
+        The parsed dict when response_format == "json_object", otherwise the
+        response text. On failure, an "Error calling <provider> API: ..."
+        string (see is_api_error_message()).
     """
+    use_gemini = gemini_client.use_gemini()
     try:
-        messages = [{"role": "user", "content": prompt}]
-        
-        kwargs = {}
-        if response_format == "json_object":
-            kwargs["response_format"] = {"type": "json_object"}
-        if seed is not None:
-            kwargs["seed"] = seed
-        
-        response = openai_client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=2000,
-            **kwargs
-        )
-        
-        # Process the response
-        content = response.choices[0].message.content
+        if use_gemini:
+            # Gemini equivalents of the OpenAI arguments (JSON mode via
+            # response_mime_type, max_output_tokens, markdown-fence stripping)
+            # are handled inside gemini_client.generate_text().
+            content = gemini_client.generate_text(
+                prompt,
+                model=model,
+                response_format=response_format,
+                temperature=temperature,
+                seed=seed,
+            )
+        else:
+            messages = [{"role": "user", "content": prompt}]
+
+            kwargs = {}
+            if response_format == "json_object":
+                kwargs["response_format"] = {"type": "json_object"}
+            if seed is not None:
+                kwargs["seed"] = seed
+
+            response = get_openai_client().chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=2000,
+                **kwargs
+            )
+
+            # Process the response
+            content = response.choices[0].message.content
         
         # If JSON format was requested, parse the result
         if response_format == "json_object":
             try:
                 result = json.loads(content)
+                # Gemini can return a top-level array where OpenAI's
+                # json_object mode always returns an object; treat that like a
+                # parse failure so the fallback shape below is used.
+                if not isinstance(result, dict):
+                    raise ValueError("Expected a JSON object at the top level")
                 
                 # Ensure all expected fields exist and have the correct types
                 if "score" not in result:
@@ -514,7 +587,9 @@ def call_openai_api(prompt, model="gpt-4o", response_format=None, temperature=0.
                     result["document_reference"] = ". ".join([str(item) for item in result["document_reference"]])
                 
                 return result
-            except json.JSONDecodeError:
+            except ValueError:
+                # ValueError covers json.JSONDecodeError and the non-object
+                # guard above.
                 return {
                     "score": 0,
                     "reasoning": "Failed to parse response from AI model",
@@ -524,7 +599,8 @@ def call_openai_api(prompt, model="gpt-4o", response_format=None, temperature=0.
         return content
     
     except Exception as e:
-        return f"Error calling OpenAI API: {str(e)}"
+        provider = "Gemini" if use_gemini else "OpenAI"
+        return f"Error calling {provider} API: {str(e)}"
 
 
 def analyze_writing_quality_chunked(full_text, exclusion_instructions="", chunk_size=3000, overlap=500, max_workers=5):

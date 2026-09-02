@@ -26,6 +26,7 @@ COPY app.py .
 COPY assessment_criteria.py .
 COPY case_generator.py .
 COPY db_models.py .
+COPY gemini_client.py .
 COPY utils.py .
 
 # Copy required application directories
