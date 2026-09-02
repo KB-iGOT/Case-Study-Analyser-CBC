@@ -16,7 +16,8 @@ Public entry points are grouped by stage:
     Stage 6 (export)             -> build_case_docx() / build_case_pdf() /
                                     build_teaching_note_docx()
 
-All AI calls go through utils.call_openai_api with temperature=0.1 and seed=42
+All AI calls go through utils.call_openai_api (OpenAI by default, Gemini when
+USE_GEMINI is enabled) with temperature=0.1 and seed=42
 for deterministic output, mirroring the writing assistant pattern.
 """
 
@@ -32,7 +33,7 @@ from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from fpdf import FPDF
 
-from utils import call_openai_api, sanitize_text_for_pdf
+from utils import call_openai_api, is_api_error_message, sanitize_text_for_pdf
 from assessment_criteria import KCM_COMPETENCIES
 
 
@@ -263,7 +264,7 @@ def _call_json(prompt, temperature=0.1, seed=42):
         seed=seed,
     )
     # Outer-exception fallback in call_openai_api returns a string starting
-    # with "Error calling OpenAI API:" — surface it as a hard error.
+    # with "Error calling <provider> API:" — surface it as a hard error.
     if isinstance(result, str):
         raise GeneratorAPIError(result)
     if not isinstance(result, dict):
@@ -292,7 +293,7 @@ def _call_text(prompt, temperature=0.1, seed=42):
         raise GeneratorAPIError(
             f"Unexpected response type {type(result).__name__} from AI call"
         )
-    if result.startswith("Error calling OpenAI API:"):
+    if is_api_error_message(result):
         raise GeneratorAPIError(result)
     return result
 
