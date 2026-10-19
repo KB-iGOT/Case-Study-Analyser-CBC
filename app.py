@@ -704,7 +704,7 @@ with st.sidebar:
                         Please provide a concise summary of the following case study document. 
                         Focus on the main theme, key events, stakeholders involved, and outcomes:
                         
-                        {st.session_state.case_study_text[:4000]}
+                        {st.session_state.case_study_text}
                         
                         {PROMPT_EXCLUSION_INSTRUCTIONS}
                         """
@@ -721,7 +721,7 @@ with st.sidebar:
                         {json.dumps(SECTOR_MAPPING, indent=2)}
                         
                         === CASE STUDY ===
-                        {st.session_state.case_study_text[:5000]}
+                        {st.session_state.case_study_text}
                         
                         {PROMPT_EXCLUSION_INSTRUCTIONS}
                         
@@ -777,10 +777,10 @@ with st.sidebar:
                             **Analysis Task:** {agent_prompt}
                             
                             === CASE STUDY DOCUMENT ===
-                            {case_text[:5000]}
+                            {case_text}
                             
                             === TEACHING NOTE DOCUMENT ===
-                            {tn_text[:5000]}
+                            {tn_text}
                             
                             Provide your analysis in the following JSON structure:
                             {{
@@ -808,10 +808,10 @@ with st.sidebar:
                             **Maximum Score:** {max_score}
                             
                             === CASE STUDY DOCUMENT ===
-                            {case_text[:5000]}
+                            {case_text}
                             
                             === TEACHING NOTE DOCUMENT ===
-                            {tn_text[:5000]}
+                            {tn_text}
                             
                             Provide an analysis with the following JSON structure:
                             {{
@@ -844,7 +844,7 @@ with st.sidebar:
                             **Maximum Score:** {max_score}
                             
                             Case Study Document:
-                            {case_text[:6000]}
+                            {case_text}
                             
                             Provide an analysis with the following JSON structure:
                             {{
@@ -951,7 +951,7 @@ with st.sidebar:
                     - Service Excellence: Standard Setting, Efficiency, Continuous Improvement, Benchmarking
                     
                     === CASE STUDY ===
-                    {case_text[:5000]}
+                    {case_text}
                     
                     {PROMPT_EXCLUSION_INSTRUCTIONS}
                     
@@ -988,7 +988,7 @@ with st.sidebar:
                     {json.dumps(SECTOR_MAPPING, indent=2)}
                     
                     === CASE STUDY ===
-                    {case_text[:5000]}
+                    {case_text}
                     
                     {PROMPT_EXCLUSION_INSTRUCTIONS}
                     
