@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+
+# Load .env before the project modules below are imported (db_models reads
+# DATABASE_URL at import time). Variables already set in the environment win.
+load_dotenv()
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 import os
