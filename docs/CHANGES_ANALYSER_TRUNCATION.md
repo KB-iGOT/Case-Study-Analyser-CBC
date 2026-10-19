@@ -2,8 +2,6 @@
 
 19 Oct 2026 · Sai Praneeth Meduri · Branch `analyser-truncation-chnage`
 
-This is Step 1 of [PROMPT_IMPROVEMENTS.md](PROMPT_IMPROVEMENTS.md).
-
 ## What was wrong
 
 When scoring, the Analyser sent the AI only the **first 4,000–6,000 characters** of the case study (about 500–780 words) and the **first 5,000 characters** of the teaching note. It never read the rest of the document, and scored it as "missing".
@@ -94,16 +92,3 @@ The GPT-4o analyser reports cannot be used for this comparison:
 
 The Decision-Forcing GPT-4o-written case cuts off mid-sentence ("…the pace of digitisation was often dictated") just before the "Dilemma or Puzzle" heading. The Analyser reported this correctly. It is a Generator issue, so it goes to Step 2.
 
-## Status
-
-- `app.py` compiles.
-- Tested with the Gemini analyser: works as intended.
-- GPT-4o analyser: not yet tested on the new code.
-- **Not committed.**
-
-## Next
-
-1. Restart the app instance that uses OpenAI, on the `analyser-truncation-chnage` branch.
-2. Re-run the six GPT-4o analyser reports, using the correct files for the Decision-Forcing Gemini-written case.
-3. Compare those reports with the Gemini analyser results above, criterion by criterion.
-4. Use the full new score table as the starting point for Step 2 (Generator prompt changes).
