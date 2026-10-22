@@ -24,7 +24,7 @@ Environment variables
 ``GOOGLE_LOCATION``               Vertex AI location (alias: GOOGLE_CLOUD_LOCATION, default: global)
 ``GOOGLE_APPLICATION_CREDENTIALS`` service-account JSON path (read by google-auth)
 ``GEMINI_API_KEY``/``GOOGLE_API_KEY``  used instead of Vertex AI when no project is set
-``GENAI_MODEL_NAME``              model id (default: gemini-3.1-flash-lite)
+``GENAI_MODEL_NAME``              model id (default: gemini-3.8-flash)
 ``GENAI_MAX_OUTPUT_TOKENS``       output-token cap (default: 8192)
 ``GENAI_THINKING_LEVEL``          low | high | default (default: low)
 """
@@ -37,7 +37,7 @@ import threading
 # OpenAI caps responses at 2000 tokens. Gemini bills "thinking" tokens against
 # max_output_tokens, so a like-for-like cap would truncate answers before any
 # visible text is produced — hence the higher default.
-DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
+DEFAULT_MODEL_NAME = "gemini-3.8-flash"
 DEFAULT_MAX_OUTPUT_TOKENS = 8192
 DEFAULT_THINKING_LEVEL = "low"
 
