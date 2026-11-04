@@ -1664,6 +1664,7 @@ def build_case_docx(case_type, intake_metadata, draft_sections, compliance=None)
     extras = []
     for label, key in [
         ("Initiative", "initiative"),
+        ("Primary protagonist", "protagonist"),
         ("Region", "region"),
         ("Sector", "sector"),
         ("Time period", "time_period"),
@@ -1869,6 +1870,7 @@ def build_case_pdf(case_type, intake_metadata, draft_sections, compliance=None):
         cover_lines.append(f"Author(s): {md.get('authors')}")
     for label, key in [
         ("Initiative", "initiative"),
+        ("Primary protagonist", "protagonist"),
         ("Region", "region"),
         ("Sector", "sector"),
         ("Time period", "time_period"),
@@ -2135,6 +2137,8 @@ def build_case_txt(case_type, intake_metadata, draft_sections):
         lines.append(f"Author(s): {md['authors']}")
     if md.get("initiative"):
         lines.append(f"Initiative: {md['initiative']}")
+    if md.get("protagonist"):
+        lines.append(f"Primary protagonist: {md['protagonist']}")
     if md.get("region"):
         lines.append(f"Region: {md['region']}")
     if md.get("sector"):

@@ -12,7 +12,7 @@ Prepared for the AGK Platform engineering team's technical review and integratio
 
 - **Providers**: The application supports **two interchangeable providers**, selected at runtime by the `USE_GEMINI` environment variable. No models are hosted inside the application.
   - `USE_GEMINI` unset/false (default) — OpenAI **`gpt-4o`** via the OpenAI cloud API (`openai` Python SDK, chat-completions).
-  - `USE_GEMINI=true` — Google **Gemini** (default `gemini-3.1-flash-lite`, override with `GENAI_MODEL_NAME`) via the `google-genai` SDK, against **Vertex AI** when `GOOGLE_PROJECT_ID` is set, otherwise the Gemini Developer API with `GEMINI_API_KEY`.
+  - `USE_GEMINI=true` — Google **Gemini** (default `gemini-3.8-flash`, override with `GENAI_MODEL_NAME`) via the `google-genai` SDK, against **Vertex AI** when `GOOGLE_PROJECT_ID` is set, otherwise the Gemini Developer API with `GEMINI_API_KEY`.
 - **How it is used**:
   - All AI calls go through a single wrapper, `call_openai_api()` in `utils.py`, which selects the provider; the Gemini implementation lives in `gemini_client.py`. Prompts, temperatures, seeds and return shapes are identical for both providers, so no caller is provider-aware.
   - Calls are **non-streaming** completions.
@@ -123,7 +123,7 @@ export OPENAI_API_KEY=sk-...
 export USE_GEMINI=true
 export GOOGLE_PROJECT_ID=<gcp project>
 export GOOGLE_LOCATION=global
-export GENAI_MODEL_NAME=gemini-3.1-flash-lite
+export GENAI_MODEL_NAME=gemini-3.8-flash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
 #    Common

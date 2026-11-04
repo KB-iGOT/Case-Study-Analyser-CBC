@@ -47,7 +47,7 @@ Reports are generated using the FPDF library, embedding visualizations from Plot
 ### Third-Party Services
 
 *   **OpenAI API** (default): Used for AI-powered text analysis, assessment, and content generation. Configured via the `OPENAI_API_KEY` environment variable.
-*   **Google Gemini** (optional alternative): Enabled with `USE_GEMINI=true`. Uses Vertex AI when `GOOGLE_PROJECT_ID`, `GOOGLE_LOCATION` and `GOOGLE_APPLICATION_CREDENTIALS` are set, or the Gemini Developer API with `GEMINI_API_KEY`. Model selected via `GENAI_MODEL_NAME` (default `gemini-3.1-flash-lite`). When enabled, no OpenAI key is required.
+*   **Google Gemini** (optional alternative): Enabled with `USE_GEMINI=true`. Uses Vertex AI when `GOOGLE_PROJECT_ID`, `GOOGLE_LOCATION` and `GOOGLE_APPLICATION_CREDENTIALS` are set, or the Gemini Developer API with `GEMINI_API_KEY`. Model selected via `GENAI_MODEL_NAME` (default `gemini-3.8-flash`). When enabled, no OpenAI key is required.
 *   **PostgreSQL Database**: The primary production database, connected via the `DATABASE_URL` environment variable. SQLite is used as a local development fallback.
 
 ### Key Python Libraries
