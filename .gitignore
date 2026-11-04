@@ -1,7 +1,0 @@
-.env
-.creds/
-.venv/
-test.db
-__pycache__/
-
-benchmark_docs/
