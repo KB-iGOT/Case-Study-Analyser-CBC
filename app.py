@@ -1,9 +1,3 @@
-from dotenv import load_dotenv
-
-# Load .env before the project modules below are imported (db_models reads
-# DATABASE_URL at import time). Variables already set in the environment win.
-load_dotenv()
-
 import streamlit as st
 from streamlit_option_menu import option_menu
 import os
@@ -704,7 +698,7 @@ with st.sidebar:
                         Please provide a concise summary of the following case study document. 
                         Focus on the main theme, key events, stakeholders involved, and outcomes:
                         
-                        {st.session_state.case_study_text}
+                        {st.session_state.case_study_text[:4000]}
                         
                         {PROMPT_EXCLUSION_INSTRUCTIONS}
                         """
@@ -721,7 +715,7 @@ with st.sidebar:
                         {json.dumps(SECTOR_MAPPING, indent=2)}
                         
                         === CASE STUDY ===
-                        {st.session_state.case_study_text}
+                        {st.session_state.case_study_text[:5000]}
                         
                         {PROMPT_EXCLUSION_INSTRUCTIONS}
                         
@@ -777,10 +771,10 @@ with st.sidebar:
                             **Analysis Task:** {agent_prompt}
                             
                             === CASE STUDY DOCUMENT ===
-                            {case_text}
+                            {case_text[:5000]}
                             
                             === TEACHING NOTE DOCUMENT ===
-                            {tn_text}
+                            {tn_text[:5000]}
                             
                             Provide your analysis in the following JSON structure:
                             {{
@@ -808,10 +802,10 @@ with st.sidebar:
                             **Maximum Score:** {max_score}
                             
                             === CASE STUDY DOCUMENT ===
-                            {case_text}
+                            {case_text[:5000]}
                             
                             === TEACHING NOTE DOCUMENT ===
-                            {tn_text}
+                            {tn_text[:5000]}
                             
                             Provide an analysis with the following JSON structure:
                             {{
@@ -844,7 +838,7 @@ with st.sidebar:
                             **Maximum Score:** {max_score}
                             
                             Case Study Document:
-                            {case_text}
+                            {case_text[:6000]}
                             
                             Provide an analysis with the following JSON structure:
                             {{
@@ -951,7 +945,7 @@ with st.sidebar:
                     - Service Excellence: Standard Setting, Efficiency, Continuous Improvement, Benchmarking
                     
                     === CASE STUDY ===
-                    {case_text}
+                    {case_text[:5000]}
                     
                     {PROMPT_EXCLUSION_INSTRUCTIONS}
                     
@@ -988,7 +982,7 @@ with st.sidebar:
                     {json.dumps(SECTOR_MAPPING, indent=2)}
                     
                     === CASE STUDY ===
-                    {case_text}
+                    {case_text[:5000]}
                     
                     {PROMPT_EXCLUSION_INSTRUCTIONS}
                     
@@ -1803,24 +1797,6 @@ elif st.session_state.get("active_tool") == "generator" and st.session_state.log
                     st.stop()
 
         proc = st.session_state.gen_processed or {}
-
-        st.subheader("Primary protagonist")
-        protagonist = (st.session_state.gen_metadata or {}).get("protagonist", "")
-        st.text_input(
-            "Primary protagonist (name and role) — from Step 2",
-            value=protagonist,
-            disabled=True,
-        )
-        if protagonist:
-            st.caption(
-                "Author-provided metadata. To change the name or role, edit Step 2 and save. "
-                "Source-derived stakeholder details are reviewed below."
-            )
-        else:
-            st.warning(
-                "No primary protagonist was entered in Step 2. Go back to Step 2, add the "
-                "protagonist's name and role, save, and re-run source processing."
-            )
 
         with st.expander("Source inventory — review and edit before drafting", expanded=False):
             inv_items = (proc.get("inventory") or {}).get("inventory", [])
