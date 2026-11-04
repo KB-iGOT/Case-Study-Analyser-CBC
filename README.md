@@ -55,7 +55,7 @@ JSON contracts and return shapes are used for both providers.
 export USE_GEMINI=true
 export GOOGLE_PROJECT_ID=prj-kb-poc1-geminiai-gcp-1010
 export GOOGLE_LOCATION=global
-export GENAI_MODEL_NAME=gemini-3.1-flash-lite
+export GENAI_MODEL_NAME=gemini-3.8-flash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
 export DATABASE_URL=postgresql://myuser:mypassword@localhost:5432/karmayogi_db
@@ -68,7 +68,7 @@ streamlit run app.py --server.port 5000
 ```bash
 export USE_GEMINI=true
 export GEMINI_API_KEY=...            # used only when GOOGLE_PROJECT_ID is unset
-export GENAI_MODEL_NAME=gemini-3.1-flash-lite
+export GENAI_MODEL_NAME=gemini-3.8-flash
 ```
 
 If you keep these in a `.env` file, load it before starting Streamlit — the app
@@ -89,7 +89,7 @@ streamlit run app.py --server.port 5000
 | `GOOGLE_LOCATION` | Gemini | `global` | Vertex AI location (alias: `GOOGLE_CLOUD_LOCATION`) |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Gemini | — | Path to the service-account JSON (read by `google-auth`) |
 | `GEMINI_API_KEY` / `GOOGLE_API_KEY` | Gemini | — | Gemini Developer API key; used when `GOOGLE_PROJECT_ID` is unset |
-| `GENAI_MODEL_NAME` | Gemini | `gemini-3.1-flash-lite` | Gemini model id |
+| `GENAI_MODEL_NAME` | Gemini | `gemini-3.8-flash` | Gemini model id |
 | `GENAI_MAX_OUTPUT_TOKENS` | Gemini | `8192` | Output-token cap (higher than OpenAI's 2000 because Gemini counts thinking tokens against it) |
 | `GENAI_THINKING_LEVEL` | Gemini | `low` | `low`, `high`, or anything else to leave the model default |
 | `DATABASE_URL` | both | SQLite fallback | PostgreSQL connection string |
@@ -101,7 +101,7 @@ On startup the application logs exactly one provider line — check it first whe
 debugging a deployment. It never echoes a key or credential contents:
 
 ```
-[AI provider] Gemini | model=gemini-3.1-flash-lite | auth=Vertex AI (project=my-project, location=global, credentials=set) | max_output_tokens=8192 | thinking_level=low
+[AI provider] Gemini | model=gemini-3.8-flash | auth=Vertex AI (project=my-project, location=global, credentials=set) | max_output_tokens=8192 | thinking_level=low
 [AI provider] OpenAI | model=gpt-4o (default) | OPENAI_API_KEY=set
 ```
 
@@ -124,7 +124,7 @@ docker run -p 5000:5000 \
   -e USE_GEMINI=true \
   -e GOOGLE_PROJECT_ID=prj-kb-poc1-geminiai-gcp-1010 \
   -e GOOGLE_LOCATION=global \
-  -e GENAI_MODEL_NAME=gemini-3.1-flash-lite \
+  -e GENAI_MODEL_NAME=gemini-3.8-flash \
   -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-sa.json \
   -e DATABASE_URL=postgresql://user:pass@host:5432/karmayogi_db \
   -e SESSION_SECRET=... \
