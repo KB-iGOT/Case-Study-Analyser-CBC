@@ -1804,6 +1804,24 @@ elif st.session_state.get("active_tool") == "generator" and st.session_state.log
 
         proc = st.session_state.gen_processed or {}
 
+        st.subheader("Primary protagonist")
+        protagonist = (st.session_state.gen_metadata or {}).get("protagonist", "")
+        st.text_input(
+            "Primary protagonist (name and role) — from Step 2",
+            value=protagonist,
+            disabled=True,
+        )
+        if protagonist:
+            st.caption(
+                "Author-provided metadata. To change the name or role, edit Step 2 and save. "
+                "Source-derived stakeholder details are reviewed below."
+            )
+        else:
+            st.warning(
+                "No primary protagonist was entered in Step 2. Go back to Step 2, add the "
+                "protagonist's name and role, save, and re-run source processing."
+            )
+
         with st.expander("Source inventory — review and edit before drafting", expanded=False):
             inv_items = (proc.get("inventory") or {}).get("inventory", [])
             if inv_items:
